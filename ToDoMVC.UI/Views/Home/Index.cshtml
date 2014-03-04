@@ -1,0 +1,86 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model AddTodoCommand
+<body class="learn-bar">
+    @Html.Partial("LearnPanel")
+    <section id="todoapp" >
+        @{
+            string containerId = Guid.NewGuid().ToString();
+            string footerId = Guid.NewGuid().ToString();
+        }        
+        <header id="header">
+            <h1>todos</h1>        
+            @using (Html.When(JqueryBind.Submit)
+                        .DoWithPreventDefault()
+                        .Submit(options =>
+                                    {
+                                        options.Url = Url.Dispatcher().Push(new AddTodoCommand
+                                                                                {
+                                                                                    ClientId = Selector.Incoding.Cookie(CookieManager.ClientId)
+                                                                                });
+                                    })
+                        .OnSuccess(dsl =>
+                                       {
+                                           dsl.WithId(containerId).Core().Trigger.Incoding();
+                                           dsl.Self().Core().Form.Reset();
+                                       })
+                        .AsHtmlAttributes()
+                        .ToBeginTag(Html, HtmlTag.Form))
+            {
+                @Html.TextBoxFor(r => r.Title, new { placeholder = "What needs to be done?", autofocus = string.Empty })
+            }
+        </header>
+        @(Html.When(JqueryBind.InitIncoding | JqueryBind.IncChangeUrl)
+              .Do()
+              .AjaxGet(Url.Dispatcher()
+                          .Query<GetTodoByClientQuery>(new
+                                                           {
+                                                                   ClientId = Selector.Incoding.Cookie(CookieManager.ClientId),
+                                                                   Type = Selector.Incoding.HashQueryString<GetTodoByClientQuery>(r => r.Type)
+                                                           })
+                          .AsJson())
+              .OnSuccess(dsl =>
+                             {
+                                 string urlTmpl = Url.Dispatcher()
+                                                     .Model(new GetTodoByClientQuery.Tmpl { FooterId = footerId })
+                                                     .AsView("~/Views/Home/Todo_List_Tmpl.cshtml");
+                                 dsl.Self().Core().Insert.WithTemplateByUrl(urlTmpl).Html();
+                                 dsl.WithId(footerId).Core().Trigger.Incoding();
+                             })
+              .AsHtmlAttributes(new { id = containerId })
+              .ToDiv())  
+        @(Html.When(JqueryBind.None)
+              .Do()
+              .Direct(IncodingResult.Success(new FooterVm
+                                                 {
+                                                         AllCount = Selector.Jquery.Class("toggle")
+                                                                            .Expression(JqueryExpression.Checked)
+                                                                            .Length(),
+                                                         IsCompleted = Selector.Jquery.Class("toggle")
+                                                                               .Is(r => r.NotEqualsAttribute(HtmlAttribute.Checked, HtmlAttribute.Checked.ToString())),
+                                                         CompletedCount = Selector.Jquery.Class("toggle")
+                                                                                  .Not(r => r.Expression(JqueryExpression.Checked))
+                                                                                  .Length(),
+                                                 }))
+              .OnSuccess(dsl =>
+                             {
+                                 string urlTmpl = Url.Dispatcher()
+                                                     .Model(new TodoFooterTmplVm
+                                                                {
+                                                                        ContainerId = containerId
+                                                                })
+                                                     .AsView("~/Views/Home/Todo_Footer_Tmpl.cshtml");
+                                 dsl.Self().Core().Insert.Prepare().WithTemplateByUrl(urlTmpl).Html();
+                             })
+              .AsHtmlAttributes(new { id = footerId })
+              .ToDiv())  
+    </section>
+    <footer id="info">
+        <p>Double-click to edit a todo</p>
+        <p>Credits:
+            <a href="http://blog.incframework.com">Vlad Kopachinsky</a>,            
+        </p>
+        <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+    </footer>
+</body>
