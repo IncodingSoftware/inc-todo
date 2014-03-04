@@ -54,13 +54,12 @@
               .Do()
               .Direct(IncodingResult.Success(new FooterVm
                                                  {
-                                                         AllCount = Selector.Jquery.Class("toggle")
-                                                                            .Expression(JqueryExpression.Checked)
+                                                         AllCount = Selector.Jquery.Class("toggle")                                                                            
                                                                             .Length(),
                                                          IsCompleted = Selector.Jquery.Class("toggle")
-                                                                               .Is(r => r.NotEqualsAttribute(HtmlAttribute.Checked, HtmlAttribute.Checked.ToString())),
+                                                                               .Is(r => r.Expression(JqueryExpression.Checked)),
                                                          CompletedCount = Selector.Jquery.Class("toggle")
-                                                                                  .Not(r => r.Expression(JqueryExpression.Checked))
+                                                                                  .Expression(JqueryExpression.Checked)
                                                                                   .Length(),
                                                  }))
               .OnSuccess(dsl =>
@@ -79,8 +78,7 @@
     <footer id="info">
         <p>Double-click to edit a todo</p>
         <p>Credits:
-            <a href="http://blog.incframework.com">Vlad Kopachinsky</a>,            
-        </p>
-        <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+            <a href="https://www.facebook.com/wlad.kopachinsky">Vlad Kopachinsky</a>,            
+        </p>        
     </footer>
 </body>
