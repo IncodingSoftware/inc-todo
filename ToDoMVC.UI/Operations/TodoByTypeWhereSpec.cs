@@ -28,9 +28,9 @@
                 case GetTodoByClientQuery.TypeOfTodo.All:
                     return null;
                 case GetTodoByClientQuery.TypeOfTodo.Active:
-                    return todo => todo.Active;
-                case GetTodoByClientQuery.TypeOfTodo.Completed:
                     return todo => !todo.Active;
+                case GetTodoByClientQuery.TypeOfTodo.Completed:
+                    return todo => todo.Active;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

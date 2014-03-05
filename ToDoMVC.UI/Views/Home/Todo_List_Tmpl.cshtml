@@ -24,16 +24,21 @@
             @using (var each = template.ForEach())
             {
                 var labelId = "label" + each.For(r => r.Id);
+                var inputId = "input" + each.For(r => r.Id);
                 Func<bool, MvcHtmlString> createCheckBox = isValue => Html.When(JqueryBind.Change)
                                                                           .Do()
                                                                           .AjaxPost(Url.Dispatcher().Push(new ToggleTodoCommand
                                                                                                               {
                                                                                                                       Id = each.For(r => r.Id)
                                                                                                               }))
-                                                                          .OnBegin(dsl => dsl.WithId(Model.FooterId).Core().Trigger.Incoding())
+                                                                          .OnBegin(dsl =>
+                                                                                       {
+                                                                                           dsl.WithSelf(r => r.Closest(HtmlTag.Li)).Core().JQuery.Attributes.ToggleClass("completed");
+                                                                                           dsl.WithId(Model.FooterId).Core().Trigger.Incoding();
+                                                                                       })
                                                                           .AsHtmlAttributes(new {@class="toggle" })
                                                                           .ToCheckBox(isValue);
-                <li>
+                <li class="@each.IsInline(r=>r.Active,"completed")">
                     <div class="view">
                         @using (each.Is(r => r.Active))
                         {
@@ -47,7 +52,11 @@
                         @using (Html.When("dblclick")
                                     .Do()
                                     .Direct()
-                                    .OnSuccess(dsl => dsl.WithSelf(r => r.Closest(HtmlTag.Li)).Core().JQuery.Attributes.ToggleClass("editing"))
+                                    .OnSuccess(dsl =>
+                                                   {
+                                                       dsl.WithSelf(r => r.Closest(HtmlTag.Li)).Core().JQuery.Attributes.ToggleClass("editing");
+                                                       dsl.WithId(inputId).Core().Trigger.Invoke(JqueryBind.Focus);
+                                                   })
                                     .AsHtmlAttributes(new {id = labelId})
                                     .ToBeginTag(Html, HtmlTag.Label))
                         {
@@ -83,7 +92,7 @@
                                              dsl.WithSelf(r => r.Closest(HtmlTag.Li)).Core().JQuery.Attributes.ToggleClass("editing");
                                              dsl.WithId(labelId).Core().JQuery.Manipulation.Text(Selector.Jquery.Self());
                                          })
-                          .AsHtmlAttributes(new { @class = "edit" })
+                          .AsHtmlAttributes(new { @class = "edit",id = inputId })
                           .ToInput(HtmlInputType.Text, each.For(r => r.Title)))    
                 </li>
             }     
