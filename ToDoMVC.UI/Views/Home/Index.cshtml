@@ -54,10 +54,8 @@
               .Do()
               .Direct(IncodingResult.Success(new FooterVm
                                                  {
-                                                         AllCount = Selector.Jquery.Class("toggle")                                                                            
-                                                                            .Length(),
-                                                         IsCompleted = Selector.Jquery.Class("toggle")
-                                                                               .Is(r => r.Expression(JqueryExpression.Checked)),
+                                                         AllCount = Selector.Jquery.Class("toggle").Length(),
+                                                         IsCompleted = Selector.Jquery.Class("toggle").Is(JqueryExpression.Checked),
                                                          CompletedCount = Selector.Jquery.Class("toggle")
                                                                                   .Expression(JqueryExpression.Checked)
                                                                                   .Length(),

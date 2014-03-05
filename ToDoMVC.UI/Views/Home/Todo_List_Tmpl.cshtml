@@ -1,9 +1,21 @@
 ﻿@model GetTodoByClientQuery.Tmpl
 @using Incoding.CQRS
+@{
+    var toggleAllId = "toggle-all";
+}
 @using (var template = Html.Incoding().Template<GetTodoByClientQuery.Response>())
 {    
     <section id="main">
-        @(Html.When(JqueryBind.Click)
+        @(Html.When(JqueryBind.None)
+              .Do()
+              .Direct()
+              .OnSuccess(dsl => dsl.Self().Behaviors(inDsl =>
+                                                         {
+                                                             inDsl.Core().JQuery.Attributes.RemoveAttr(HtmlAttribute.Checked);
+                                                             inDsl.Core().JQuery.Attributes.SetAttr(HtmlAttribute.Checked)
+                                                                  .If(r => r.Is(() => Selector.Jquery.Class("toggle").Is(JqueryExpression.Checked)));
+                                                         }))
+              .When(JqueryBind.Click)
               .Do()
               .Direct()
               .OnSuccess(dsl =>
@@ -14,10 +26,11 @@
                                                        inDsl.Core().JQuery.Attributes.RemoveAttr(HtmlAttribute.Checked);
                                                        inDsl.Core().JQuery.Attributes.SetAttr(HtmlAttribute.Checked)
                                                             .If(builder => builder.Is(() => Selector.Jquery.Self()));
+                                                       inDsl.Core().Trigger.Change();
                                                    });
                                  dsl.WithId(Model.FooterId).Core().Trigger.Incoding();
                              })
-              .AsHtmlAttributes(new { id = "toggle-all" })
+              .AsHtmlAttributes(new { id = toggleAllId })
               .ToCheckBox(false))
                   
         <ul id="todo-list">
@@ -33,8 +46,11 @@
                                                                                                               }))
                                                                           .OnBegin(dsl =>
                                                                                        {
-                                                                                           dsl.WithSelf(r => r.Closest(HtmlTag.Li)).Core().JQuery.Attributes.ToggleClass("completed");
+                                                                                           dsl.WithSelf(r => r.Closest(HtmlTag.Li)).Core().JQuery.Attributes.RemoveClass("completed");
+                                                                                           dsl.WithSelf(r => r.Closest(HtmlTag.Li)).Core().JQuery.Attributes.AddClass("completed")
+                                                                                              .If(builder => builder.Is(() => Selector.Jquery.Self()));
                                                                                            dsl.WithId(Model.FooterId).Core().Trigger.Incoding();
+                                                                                           dsl.WithId(toggleAllId).Core().Trigger.None();
                                                                                        })
                                                                           .AsHtmlAttributes(new {@class="toggle" })
                                                                           .ToCheckBox(isValue);
@@ -73,6 +89,7 @@
                                            {
                                                r.WithSelf(s => s.Closest(HtmlTag.Li)).Core().JQuery.Manipulation.Remove();
                                                r.WithId(Model.FooterId).Core().Trigger.Incoding();
+                                               r.WithId(toggleAllId).Core().Trigger.None();
                                            })
                               .AsHtmlAttributes(new { @class = "destroy" })
                               .ToButton(string.Empty))    
