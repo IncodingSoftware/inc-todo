@@ -46,11 +46,17 @@
                                                                                                               }))
                                                                           .OnBegin(dsl =>
                                                                                        {
-                                                                                           dsl.WithSelf(r => r.Closest(HtmlTag.Li)).Core().JQuery.Attributes.RemoveClass("completed");
-                                                                                           dsl.WithSelf(r => r.Closest(HtmlTag.Li)).Core().JQuery.Attributes.AddClass("completed")
-                                                                                              .If(builder => builder.Is(() => Selector.Jquery.Self()));
+                                                                                           dsl.WithSelf(r => r.Closest(HtmlTag.Li))
+                                                                                              .Behaviors(inDsl =>
+                                                                                                             {
+                                                                                                                 inDsl.Core().JQuery.Attributes.RemoveClass("completed");
+                                                                                                                 inDsl.Core().JQuery.Attributes.AddClass("completed")
+                                                                                                                      .If(builder => builder.Is(() => Selector.Jquery.Self()));
+                                                                                                             });
+
                                                                                            dsl.WithId(Model.FooterId).Core().Trigger.Incoding();
                                                                                            dsl.WithId(toggleAllId).Core().Trigger.None();
+                                                                                           
                                                                                        })
                                                                           .AsHtmlAttributes(new {@class="toggle" })
                                                                           .ToCheckBox(isValue);
@@ -81,10 +87,10 @@
                         @(Html.When(JqueryBind.Click)
                               .Do()
                               .AjaxPost(Url.Dispatcher().Push(new DeleteEntityByIdCommand
-                                                                  {
-                                                                          Id = each.For(r => r.Id),
-                                                                          AssemblyQualifiedName = typeof(Todo).AssemblyQualifiedName
-                                                                  }))
+                                                 {
+                                                         Id = each.For(r => r.Id),
+                                                         AssemblyQualifiedName = typeof(Todo).AssemblyQualifiedName
+                                                 }))
                               .OnBegin(r =>
                                            {
                                                r.WithSelf(s => s.Closest(HtmlTag.Li)).Core().JQuery.Manipulation.Remove();

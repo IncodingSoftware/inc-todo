@@ -9,47 +9,38 @@
             string containerId = Guid.NewGuid().ToString();
             string footerId = Guid.NewGuid().ToString();
         }        
+        
         <header id="header">
             <h1>todos</h1>        
-            @using (Html.When(JqueryBind.Submit)
-                        .DoWithPreventDefault()
-                        .Submit(options =>
-                                    {
-                                        options.Url = Url.Dispatcher().Push(new AddTodoCommand
-                                                                                {
-                                                                                    ClientId = Selector.Incoding.Cookie(CookieManager.ClientId)
-                                                                                });
-                                    })
-                        .OnSuccess(dsl =>
-                                       {
-                                           dsl.WithId(containerId).Core().Trigger.Incoding();
-                                           dsl.Self().Core().Form.Reset();
-                                       })
-                        .AsHtmlAttributes()
-                        .ToBeginTag(Html, HtmlTag.Form))
+            @using (Html.Todo().BeginForm<AddTodoCommand>(setting =>
+                                         {
+                                             setting.TargetId = containerId;
+                                             setting.Routes = new
+                                                                  {
+                                                                          ClientId = Selector.Incoding.Cookie(CookieManager.ClientId)
+                                                                  };
+                                         }))
             {
-                @Html.TextBoxFor(r => r.Title, new { placeholder = "What needs to be done?", autofocus = string.Empty })
+                @Html.TextBoxFor(r => r.Title, new { placeholder = "What needs to be done?", autofocus = "" })
             }
         </header>
-        @(Html.When(JqueryBind.InitIncoding | JqueryBind.IncChangeUrl)
-              .Do()
-              .AjaxGet(Url.Dispatcher()
-                          .Query<GetTodoByClientQuery>(new
-                                                           {
-                                                                   ClientId = Selector.Incoding.Cookie(CookieManager.ClientId),
-                                                                   Type = Selector.Incoding.HashQueryString<GetTodoByClientQuery>(r => r.Type)
-                                                           })
-                          .AsJson())
-              .OnSuccess(dsl =>
-                             {
-                                 string urlTmpl = Url.Dispatcher()
-                                                     .Model(new GetTodoByClientQuery.Tmpl { FooterId = footerId })
-                                                     .AsView("~/Views/Home/Todo_List_Tmpl.cshtml");
-                                 dsl.Self().Core().Insert.WithTemplateByUrl(urlTmpl).Html();
-                                 dsl.WithId(footerId).Core().Trigger.Incoding();
-                             })
-              .AsHtmlAttributes(new { id = containerId })
-              .ToDiv())  
+
+        @Html.Todo().Container(setting =>
+                     {
+                         setting.Id = containerId;
+                         setting.Url = Url.Dispatcher()
+                                          .Query<GetTodoByClientQuery>(new
+                                                        {
+                                                                ClientId = Selector.Incoding.Cookie(CookieManager.ClientId),
+                                                                Type = Selector.Incoding.HashQueryString<GetTodoByClientQuery>(r => r.Type)
+                                                        })
+                                          .AsJson();
+                         setting.Tmpl = Url.Dispatcher()
+                                           .Model(new GetTodoByClientQuery.Tmpl { FooterId = footerId })
+                                           .AsView("~/Views/Home/Todo_List_Tmpl.cshtml");
+                         setting.DependencyId = footerId;
+                     })
+                               
         @(Html.When(JqueryBind.None)
               .Do()
               .Direct(IncodingResult.Success(new FooterVm
@@ -76,7 +67,7 @@
     <footer id="info">
         <p>Double-click to edit a todo</p>
         <p>Credits:
-            <a href="https://www.facebook.com/wlad.kopachinsky">Vlad Kopachinsky</a>,            
+            <a href="https://www.facebook.com/vlad.kopachinsky">Vlad Kopachinsky</a>,            
         </p>        
     </footer>
 </body>

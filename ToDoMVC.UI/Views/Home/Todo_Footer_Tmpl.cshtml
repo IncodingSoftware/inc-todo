@@ -7,54 +7,46 @@
         @using (var each = template.ForEach())
         {
             <span id="todo-count">
-                <strong class="ng-binding">@each.For(r => r.AllCount)</strong>                
-            </span>            
-            <ul id="filters">
-                @{
-                    const string classSelected = "selected";
-                    Func<GetTodoByClientQuery.TypeOfTodo,bool, MvcHtmlString> createLi = (typeOfTodo,isFirst) => Html.When(JqueryBind.InitIncoding)
-                                                                                                      .Do()
-                                                                                                      .Direct()
-                                                                                                      .OnSuccess(dsl =>
-                                                                                                                     {
-                                                                                                                         var type = Selector.Incoding.HashQueryString<GetTodoByClientQuery>(r => r.Type);
-                                                                                                                         if (isFirst)
-                                                                                                                             dsl.Self().Core().JQuery.Attributes.AddClass(classSelected).If(s => s.Is(() => type == ""));
-
-                                                                                                                         dsl.Self().Core().JQuery.Attributes.AddClass(classSelected).If(s => s.Is(() => type == typeOfTodo.ToString()));
-                                                                                                                     })
-                                                                                                      .When(JqueryBind.Click)
-                                                                                                      .Do()
-                                                                                                      .Direct()
-                                                                                                      .OnSuccess(dsl =>
-                                                                                                                     {
-                                                                                                                         dsl.WithSelf(r => r.Closest(HtmlTag.Ul).Find(HtmlTag.A)).Core().JQuery.Attributes.RemoveClass(classSelected);
-                                                                                                                         dsl.Self().Core().JQuery.Attributes.AddClass(classSelected);                                                                                                                         
-                                                                                                                     })
-                                                                                                      .AsHtmlAttributes(new { href = "#!".AppendToHashQueryString(new { Type = typeOfTodo }) })
-                                                                                                      .ToLink(typeOfTodo.ToString());
-                }                
+                <strong>@each.For(r => r.AllCount)</strong>                
+            </span>
+            <ul id="filters">                
+                @{ const string classSelected = "selected"; }                
                 <li>
-                    @createLi(GetTodoByClientQuery.TypeOfTodo.All,true)
+                    @Html.Todo().LiHash(setting =>
+                                            {
+                                                setting.IsFirst = true;
+                                                setting.SelectedClass = classSelected;
+                                                setting.Type = GetTodoByClientQuery.TypeOfTodo.All;
+                                            })                    
                 </li>
                 <li>
-                    @createLi(GetTodoByClientQuery.TypeOfTodo.Active,false)
+                    @Html.Todo().LiHash(setting =>
+                                            {
+                                                setting.SelectedClass = classSelected;
+                                                setting.Type = GetTodoByClientQuery.TypeOfTodo.Active;
+                                            })                    
                 </li>
                 <li>
-                    @createLi(GetTodoByClientQuery.TypeOfTodo.Completed,false)
-                </li>
+                    @Html.Todo().LiHash(setting =>
+                                            {
+                                                setting.SelectedClass = classSelected;
+                                                setting.Type = GetTodoByClientQuery.TypeOfTodo.Completed;
+                                            })      
+                </li>              
             </ul>
+      
             using (each.Is(r => r.IsCompleted))
             {
-                @(Html.When(JqueryBind.Click)
-                      .Do()
-                      .AjaxPost(Url.Dispatcher().Push(new ClearCompletedCommand
-                                                          {
-                                                                  ClientId = Selector.Incoding.Cookie(CookieManager.ClientId)
-                                                          }))
-                      .OnSuccess(dsl => dsl.WithId(Model.ContainerId).Core().Trigger.Incoding())
-                      .AsHtmlAttributes(new { id = "clear-completed", @class = each.Inline(r => r.IsCompleted, isTrue: "ng-binding", isFalse: "ng-binding ng-hide") })
-                      .ToButton("Clear completed (" + each.For(r => r.CompletedCount) + ")"))
+                @Html.Todo().Verb(setting =>
+                                      {
+                                          setting.Url = Url.Dispatcher().Push(new ClearCompletedCommand
+                                                                                  {
+                                                                                          ClientId = Selector.Incoding.Cookie(CookieManager.ClientId)
+                                                                                  });
+                                          setting.DependencyId = Model.ContainerId;
+                                          setting.Attr = new { id = "clear-completed", @class = each.NotInline(r => r.IsCompleted, "ng-hide") };
+                                          setting.Content = "Clear completed (" + each.For(r => r.CompletedCount) + ")";
+                                      })       
             }
         }
     </footer>
