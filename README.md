@@ -2,7 +2,7 @@
 <strong>disclaimer</strong>: this <a title="AngularJs vs IML" href="http://blog.incframework.com/angularjs-vs-iml/">article</a> is a rejoinder (that was highly critical on <a href="http://habrahabr.ru/post/214293/">Habr</a>) and fulfil a potential of IML on the example of popular app <a href="http://todomvc.com">ToDo MVC</a>.
 Critic is not the word for the discussion concerning my previous article. It looked like an assault and there were unpleasant comments (ludicrous Top on the picture), moreover even impartial:
 <ul>
-	<li><strong>Code on AngularJs is no great shakes </strong><b>фонтан</b>  - – difficult to disprove, although they are all from web-site and popular instruction</li>
+	<li><strong>Code on AngularJs is no great shakes </strong>  - – difficult to disprove, although they are all from web-site and popular instruction</li>
 	<li><strong>Weak examples</strong> - we stressed on the tasks, not on the scripts. But I agree that more complex decision fulfils a potential (I offered some our projects that are available on “open source”, but they were ignored)</li>
 	<li><strong>Do not know AngularJs ?</strong> -  for obvious reasons it’s hurt the developers <strong>AngularJs</strong></li>
 	<li><strong>Topic JS</strong> - this is an grave error, because if you don’t use asp.net mvc it’s difficult to understand possibilities of typified <strong>TextBoxFor</strong> or other add-ons.</li>
